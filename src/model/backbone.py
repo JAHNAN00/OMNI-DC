@@ -67,7 +67,10 @@ class Backbone(nn.Module):
             raise TypeError(mode)
 
         if args.backbone == "cformer":
-            self.former = PVT(in_chans=64, patch_size=2, pretrained=Path(__file__).parent / '../pretrained/pvt.pth',
+            from_scratch = getattr(args, 'from_scratch', False)
+            self.former = PVT(in_chans=64, patch_size=2,
+                              pretrained=None if from_scratch else Path(__file__).parent / '../pretrained/pvt.pth',
+                              resnet_pretrained=not from_scratch,
                               backbone_pattern_condition_format=args.backbone_pattern_condition_format, num_pattern_types=args.num_pattern_types)
             channels = [64, 128, 64, 128, 320, 512]
         else:

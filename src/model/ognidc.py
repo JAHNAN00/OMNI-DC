@@ -12,7 +12,6 @@ import sys
 
 from optim_layer.optim_layer import DepthGradOptimLayer
 
-from depth_models.depth_anything_v2.depth_anything_v2.dpt import DepthAnythingV2
 from align_utils import resize_image, depth2disparity, disparity2depth, align_least_square, align_single_res
 
 from huggingface_hub import PyTorchModelHubMixin
@@ -60,7 +59,7 @@ class OGNIDC(nn.Module, PyTorchModelHubMixin):
         encoder = 'vitl'
 
         if self.args.load_dav2:
-
+            from depth_models.depth_anything_v2.depth_anything_v2.dpt import DepthAnythingV2
             self.depth_module = DepthAnythingV2(**dav2_model_configs[encoder])
             self.depth_module.load_state_dict(
                 torch.load(f'./depth_models/depth_anything_v2/checkpoints/depth_anything_v2_{encoder}.pth',

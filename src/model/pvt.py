@@ -5,8 +5,6 @@ from functools import partial
 import torchvision
 
 from timm.models.layers import DropPath, to_2tuple, trunc_normal_
-from mmseg.utils import get_root_logger
-from mmcv.runner import load_checkpoint
 from resnet_cbam import BasicBlock
 from pathlib import Path
 
@@ -185,7 +183,8 @@ class PyramidVisionTransformer(nn.Module):
                  num_heads=[1, 2, 4, 8], mlp_ratios=[4, 4, 4, 4], qkv_bias=False, qk_scale=None, drop_rate=0.,
                  attn_drop_rate=0., drop_path_rate=0., norm_layer=nn.LayerNorm, depths=[3, 4, 6, 3],
                  sr_ratios=[8, 4, 2, 1], num_stages=4, pretrained=None,
-                 backbone_pattern_condition_format='none', num_pattern_types=3, depth_pattern_embedding_dim=128
+                  backbone_pattern_condition_format='none', num_pattern_types=3, depth_pattern_embedding_dim=128,
+                  resnet_pretrained=True
                  ):
         super().__init__()
         self.depths = depths
@@ -199,7 +198,7 @@ class PyramidVisionTransformer(nn.Module):
         else:
             additional_embedding_dim = 0
 
-        net = get_resnet34(pretrained=True)
+        net = get_resnet34(pretrained=resnet_pretrained)
         setattr(self, "embed_layer1", net.layer1)
         setattr(self, "embed_layer2", net.layer2)
         del net
@@ -237,6 +236,8 @@ class PyramidVisionTransformer(nn.Module):
 
     def init_weights(self, pretrained=None):
         if isinstance(pretrained, str):
+            from mmseg.utils import get_root_logger
+            from mmcv.runner import load_checkpoint
             logger = get_root_logger()
             logger.setLevel('ERROR')
             load_checkpoint(self, pretrained, map_location='cpu', strict=False, logger=logger)
@@ -318,7 +319,8 @@ class PVT(PyramidVisionTransformer):
             qkv_bias=True, norm_layer=partial(nn.LayerNorm, eps=1e-6), depths=[3, 4, 6, 3],
             sr_ratios=[8, 4, 2, 1], drop_rate=0.0, drop_path_rate=0.1, pretrained=kwargs['pretrained'],
             backbone_pattern_condition_format=kwargs['backbone_pattern_condition_format'],
-            num_pattern_types=kwargs['num_pattern_types']
+            num_pattern_types=kwargs['num_pattern_types'],
+            resnet_pretrained=kwargs.get('resnet_pretrained', True)
         )
 
 

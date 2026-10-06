@@ -9,3 +9,6 @@ apex
 
 src/pretrained
 src_bkup
+/outputs/
+/data/
+.pytest_cache/
